@@ -1,0 +1,6 @@
+*.png
+*.tiff
+*.fits
+*.pdf
+.*.swp
+.*~
