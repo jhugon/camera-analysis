@@ -68,6 +68,9 @@ class OnlineStatsCalc:
     def get_sample_std(self):
         return np.sqrt(self.ss/(self.n-1))
 
+    def get_sample_variance(self):
+        return self.ss/(self.n-1)
+
 if __name__ == "__main__":
 
     bias_fnames = glob.glob("BIAS/*.cr2")

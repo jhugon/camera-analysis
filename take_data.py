@@ -76,9 +76,9 @@ if __name__ == "__main__":
 
     camera = Camera()
 
-    N = 2
+    N = 10
     
-    iso_choices = camera.get_isos()[1:]
+    iso_choices = reversed(camera.get_isos()[1:])
     shutterspeed_choices = list(reversed(camera.get_shutterspeeds()))
     shutterspeed_choices = shutterspeed_choices[15:]
     print(shutterspeed_choices)
@@ -107,9 +107,9 @@ if __name__ == "__main__":
                     except Exception:
                         print(f"Error reading image: {fn}")
                         continue
-                if np.percentile(img,1.) < 280.:
-                    continue
-                if np.percentile(img,99.9) > 4000.:
+                #if np.percentile(img,1.) < 280.:
+                #    continue
+                if np.percentile(img,99) == np.max(img):
                     break
                 print(f"{iso:4} {shutterspeed:14} "+get_stats(img,table=True))
                 try:
@@ -123,4 +123,3 @@ if __name__ == "__main__":
                 fname = f"{fname_base}{i:04d}.cr2"
                 #print(fname)
                 camera.capture_image(fname)
-        break

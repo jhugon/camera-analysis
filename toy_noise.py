@@ -68,29 +68,31 @@ def linear_fit(x,y,printinfo=True):
 def plot_linear_fit(ax, xdata, slope,intercept,slopeerror, intercepterror, yerr):
     ax.plot(xdata,slope*xdata+intercept,label=f"Fit: y = {slope:.3g}x+{intercept:.3g}")
 
-N = 1000
+if __name__ == "__main__":
 
-lambdas = np.linspace(0.5,20,10)
-means = np.zeros(lambdas.shape)
-stds = np.zeros(lambdas.shape)
-variances = np.zeros(lambdas.shape)
-
-for i in range(len(lambdas)):
-    data = np.random.poisson(lambdas[i],N)
-    means[i] = np.mean(data*4.5)
-    stds[i] = 20+np.std(data*4.5)
-    variances[i] = 400+np.var(data*4.5)
-
-stds_results = linear_fit(means,stds)
-variances_results = linear_fit(means,variances)
-fig, ax = plt.subplots()
-ax.scatter(means,stds)
-plot_linear_fit(ax,means,*stds_results)
-ax.legend()
-fig.savefig("toy_stdsVmeans.png")
-fig, ax = plt.subplots()
-ax.scatter(means,variances)
-plot_linear_fit(ax,means,*variances_results)
-ax.legend()
-fig.savefig("toy_variancesVmeans.png")
-print(f"1/slope: {1/variances_results[0]}")
+    N = 1000
+    
+    lambdas = np.linspace(0.5,20,10)
+    means = np.zeros(lambdas.shape)
+    stds = np.zeros(lambdas.shape)
+    variances = np.zeros(lambdas.shape)
+    
+    for i in range(len(lambdas)):
+        data = np.random.poisson(lambdas[i],N)
+        means[i] = np.mean(data*4.5)
+        stds[i] = 20+np.std(data*4.5)
+        variances[i] = 400+np.var(data*4.5)
+    
+    stds_results = linear_fit(means,stds)
+    variances_results = linear_fit(means,variances)
+    fig, ax = plt.subplots()
+    ax.scatter(means,stds)
+    plot_linear_fit(ax,means,*stds_results)
+    ax.legend()
+    fig.savefig("toy_stdsVmeans.png")
+    fig, ax = plt.subplots()
+    ax.scatter(means,variances)
+    plot_linear_fit(ax,means,*variances_results)
+    ax.legend()
+    fig.savefig("toy_variancesVmeans.png")
+    print(f"1/slope: {1/variances_results[0]}")
