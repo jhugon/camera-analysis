@@ -4,6 +4,7 @@ import rawpy
 import imageio
 import pyexiv2
 import glob
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from investigate_bias import OnlineStatsCalc, get_stats, make_stats_and_frames
@@ -55,6 +56,10 @@ if __name__ == "__main__":
     fig.savefig("wall_varVmean.png")
     fig.savefig("wall_varVmean.pdf")
 
+    gain_dict = {}
     print(f"{'ISO':4} Gain [e-/ADU]")
     for iso, gain, gain_err in zip(isos,gains,gain_errs):
         print(f"{iso:4} {gain:6.3f} +/- {gain_err:6.3f}")
+        gain_dict[iso] = {"gain":gain,"gain_err":gain_err}
+    with open("gain.pkl","wb") as savefile:
+        pickle.dump(gain_dict,savefile)

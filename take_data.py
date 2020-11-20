@@ -8,11 +8,15 @@ import gphoto2 as gp
 import glob
 import os
 import shutil
+from fractions import Fraction
 import tempfile
 import numpy as np
 import matplotlib.pyplot as plt
 
 from investigate_bias import get_stats
+
+def shutterspeed_to_float(x):
+    return float(Fraction(x))
 
 class Camera:
 
@@ -72,12 +76,7 @@ class Camera:
         camera_file.save(outfn)
         self.camera.file_delete(camera_file_path.folder, camera_file_path.name)
 
-if __name__ == "__main__":
-
-    camera = Camera()
-
-    N = 10
-    
+def take_flat_data(camera, N):
     iso_choices = reversed(camera.get_isos()[1:])
     shutterspeed_choices = list(reversed(camera.get_shutterspeeds()))
     shutterspeed_choices = shutterspeed_choices[15:]
@@ -111,7 +110,7 @@ if __name__ == "__main__":
                 #    continue
                 if np.percentile(img,99) == np.max(img):
                     break
-                print(f"{iso:4} {shutterspeed:14} "+get_stats(img,table=True))
+                print(f"{iso:4} {shutterspeed:14} "+get_stats(img,table=True),flush=True)
                 try:
                     os.makedirs(dirname)
                 except FileExistsError:
@@ -123,3 +122,46 @@ if __name__ == "__main__":
                 fname = f"{fname_base}{i:04d}.cr2"
                 #print(fname)
                 camera.capture_image(fname)
+
+def take_dark_data(camera, N):
+    iso_choices = reversed(camera.get_isos()[1:])
+    shutterspeed_choices = list(reversed(camera.get_shutterspeeds()))
+    shutterspeed_choices.pop(shutterspeed_choices.index("bulb"))
+    shutterspeed_choices_float = np.array([shutterspeed_to_float(x) for x in shutterspeed_choices])
+    shutterspeed_min = shutterspeed_choices[np.argmin(shutterspeed_choices_float)]
+    shutterspeeds_to_use = [shutterspeed_min]
+    for i, include in enumerate(shutterspeed_choices_float >= 1):
+        if include:
+            shutterspeeds_to_use.append(shutterspeed_choices[i])
+    #shutterspeeds_to_use = ["1/4000","1","5","15"]
+    print("Using shutterspeeds: ", shutterspeeds_to_use)
+    
+    for iso in iso_choices:
+        for shutterspeed in shutterspeeds_to_use:
+            shutterspeed_for_fn = shutterspeed
+            if "/" in shutterspeed_for_fn:
+                shutterspeed_for_fn = shutterspeed_for_fn[2:] + "th"
+            elif "." in shutterspeed_for_fn:
+                shutterspeed_for_fn = shutterspeed_for_fn.replace('.','p')
+            dirname = f"darkdata/ISO{iso}/shutter{shutterspeed_for_fn}"
+            fname_base = os.path.join(dirname,f"dark_ISO{iso}_shutter{shutterspeed_for_fn}_")
+            print(f"ISO: {iso} shutter speed: {shutterspeed}",flush=True)
+            camera.set_iso(iso)
+            camera.set_shutterspeed(shutterspeed)
+            try:
+                os.makedirs(dirname)
+            except FileExistsError:
+                pass
+            for i in range(1,N+1):
+                fname = f"{fname_base}{i:04d}.cr2"
+                #print(fname)
+                camera.capture_image(fname)
+
+if __name__ == "__main__":
+
+    camera = Camera()
+
+    N = 10
+
+    #take_flat_data(camera,N)
+    take_dark_data(camera,N)
